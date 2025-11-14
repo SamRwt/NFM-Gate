@@ -179,20 +179,3 @@ def purify(flow, x_adv, g_val=0.5, steps=50, lr=1e-1, device='cuda'):
     with torch.no_grad():
         x_pure = flow.inverse(z)
     return x_pure.clamp(0,1)
-
-# ------------------------
-# example usage
-# ------------------------
-if __name__ == "__main__":
-    # dummy dataset
-    from torchvision import datasets, transforms
-    ds = datasets.FakeData(size=1024, image_size=(3,32,32), transform=transforms.ToTensor())
-    dl = DataLoader(ds, batch_size=64, shuffle=True)
-    flow = SimpleFlow(in_channels=3, n_blocks=4)
-    train_flow(flow, dl, epochs=3, lr=1e-3, device='cpu')
-
-    # take 1 sample, simulate attack by adding noise
-    x, _ = ds[0]
-    x_adv = (x + 0.2 * torch.randn_like(x)).clamp(0,1).unsqueeze(0)
-    x_pure = purify(flow, x_adv, g_val=0.8, steps=200, lr=1e-2, device='cpu')
-    print("done")
